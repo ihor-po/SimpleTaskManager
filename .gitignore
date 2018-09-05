@@ -2,4 +2,5 @@
 .vs/
 SimpleTaskManager/bin/
 SimpleTaskManager/obj/
-SimpleTaskManager/Log/
+SimpleTaskManager/Log/logData.log
+
