@@ -48,6 +48,7 @@ namespace SimpleTaskManager
             mainTimer.Tick += MainTimer_Tick;
             mf_goBtn.Click += Mf_goBtn_Click;
             mf_cb_fin.CheckedChanged += Mf_cb_fin_CheckedChanged;
+            mf_cb_plan.CheckedChanged += Mf_cb_plan_CheckedChanged;
 
             try
             {
@@ -65,7 +66,29 @@ namespace SimpleTaskManager
         }
 
         /// <summary>
-        /// Измеенение состояния чекбокса Завершить
+        /// Обработка изменение состояния чекбокса запланировать
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Mf_cb_plan_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mf_cb_plan.Checked == true)
+            {
+                mf_dp_date.Enabled = true;
+                mf_dp_time.Enabled = true;
+
+                mf_dp_date.Value = DateTime.Now;
+                mf_dp_time.Value = DateTime.Now;
+            }
+            else
+            {
+                mf_dp_date.Enabled = false;
+                mf_dp_time.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Обработка измеенение состояния чекбокса Завершить
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
