@@ -313,7 +313,12 @@ namespace SimpleTaskManager
                     Process.Start(proc);
                     SetLogData($"Запущен процесс {proc}");
                 }
-                
+
+                if (eventTimer != null)
+                {
+                    eventTimer.Dispose();
+                }
+
             }
             catch (Exception ex)
             {
@@ -342,8 +347,24 @@ namespace SimpleTaskManager
         {
             try
             {
-                pr.Kill();
+                if (pr.ProcessName == "chrome")
+                {
+                    foreach(Process p in Process.GetProcessesByName("chrome"))
+                    {
+                        p.Kill();
+                    }
+                }
+                else
+                {
+                    pr.Kill();
+                }
+                
                 SetLogData($"Процесс {pr.ProcessName} успешно остановлен!");
+
+                if (eventTimer != null)
+                {
+                    eventTimer.Dispose();
+                }
             }
             catch (Exception ex)
             {
