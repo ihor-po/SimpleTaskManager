@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Thr = System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,8 @@ namespace SimpleTaskManager
     public partial class main_form : Form
     {
         Timer mainTimer;
+
+        Thr.Timer eventTimer;
         public main_form()
         {
             InitializeComponent();
@@ -124,7 +127,18 @@ namespace SimpleTaskManager
             }
             else if (mf_cb_plan.Checked == true)
             {
+                Thr.TimerCallback callback = new Thr.TimerCallback(StartProc);
 
+                eventTimer = new Thr.Timer(callback);
+
+                if (mf_dp_date.Value > mf_dp_time.Value)
+                {
+                    StartTimer(mf_dp_date.Value, mf_dp_time.Value);
+                }
+                else
+                {
+                    StartTimer(mf_dp_time.Value, mf_dp_date.Value);
+                }
             }
             else if (mf_cb_fin.Checked == true)
             {
@@ -295,6 +309,10 @@ namespace SimpleTaskManager
             return pr;
         }
 
+        /// <summary>
+        /// Завершение процесса
+        /// </summary>
+        /// <param name="pr"></param>
         private void StopProcess(Process pr)
         {
             try
@@ -307,6 +325,41 @@ namespace SimpleTaskManager
                 Error(ex.Message);
             }
             
+        }
+
+        /// <summary>
+        /// Запуск таймера для запуска процесса
+        /// </summary>
+        /// <param name="dtUne"></param>
+        /// <param name="dtDeux"></param>
+        private void StartTimer(DateTime dtUne, DateTime dtDeux)
+        {
+            try
+            {
+                TimeSpan ts = dtUne.Subtract(dtDeux);
+
+                eventTimer.Change(ts, new TimeSpan(0));
+
+                SetLogData($"Запланирован запуск процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
+                MessageBox.Show("Запуск процесса успешно запланирован!");
+                mf_cb_plan.Checked = false;
+                mf_tb_procName.Text = "";
+                mf_tb_procParam.Text = "";
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+            }
+            
+        }
+
+        /// <summary>
+        /// Функция для вызова из таймера запуска процесса
+        /// </summary>
+        /// <param name="a"></param>
+        private void StartProc(object a)
+        {
+            StartProcess(mf_tb_procName.Text, mf_tb_procParam.Text);
         }
     }
 
