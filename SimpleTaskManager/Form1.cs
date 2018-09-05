@@ -18,6 +18,10 @@ namespace SimpleTaskManager
         Timer mainTimer;
 
         Thr.Timer eventTimer;
+
+        string procName;
+        string procProp;
+
         public main_form()
         {
             InitializeComponent();
@@ -122,6 +126,9 @@ namespace SimpleTaskManager
                 return;
             }
 
+            procName = mf_tb_procName.Text;
+            procProp = mf_tb_procParam.Text;
+
             if (mf_cb_plan.Checked == true && mf_cb_fin.Checked == true)
             {
                 Thr.TimerCallback callback = new Thr.TimerCallback(StopProc);
@@ -155,7 +162,7 @@ namespace SimpleTaskManager
             }
             else if (mf_cb_fin.Checked == true)
             {
-                Process pr = GetProcessByName(mf_tb_procName.Text);
+                Process pr = GetProcessByName(procName);
 
                 if (pr != null)
                 {
@@ -163,12 +170,12 @@ namespace SimpleTaskManager
                 }
                 else
                 {
-                    Error($"Требуемый процесс {mf_tb_procName.Text} - не найден!");
+                    Error($"Требуемый процесс {procName} - не найден!");
                 }
             }
             else
             {
-                StartProcess(mf_tb_procName.Text, mf_tb_procParam.Text);
+                StartProcess(procName, procProp);
             }
 
         }
@@ -360,7 +367,7 @@ namespace SimpleTaskManager
 
                     eventTimer.Change(ts, new TimeSpan(0));
 
-                    SetLogData($"Запланирован запуск процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
+                    SetLogData($"Запланирован запуск процесса {procName} время выполнения {dtUne.ToString()}");
                     MessageBox.Show("Запуск процесса успешно запланирован!");
                     mf_cb_plan.Checked = false;
                     mf_tb_procName.Text = "";
@@ -379,9 +386,10 @@ namespace SimpleTaskManager
 
                     eventTimer.Change(ts, new TimeSpan(0));
 
-                    SetLogData($"Запланирована остановка процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
+                    SetLogData($"Запланирована остановка процесса {procName} время выполнения {dtUne.ToString()}");
                     MessageBox.Show("Остановка процесса успешно запланирована!");
                     mf_cb_plan.Checked = false;
+                    mf_cb_fin.Checked = false;
                     mf_tb_procName.Text = "";
                     mf_tb_procParam.Text = "";
                 }
@@ -400,7 +408,7 @@ namespace SimpleTaskManager
         /// <param name="a"></param>
         private void StartProc(object a)
         {
-            StartProcess(mf_tb_procName.Text, mf_tb_procParam.Text);
+            StartProcess(procName, procProp);
         }
 
         /// <summary>
@@ -409,7 +417,7 @@ namespace SimpleTaskManager
         /// <param name="a"></param>
         private void StopProc(object a)
         {
-            Process pr = GetProcessByName(mf_tb_procName.Text);
+            Process pr = GetProcessByName(procName);
 
             if (pr != null)
             {
@@ -417,7 +425,7 @@ namespace SimpleTaskManager
             }
             else
             {
-                Error($"Требуемый процесс {mf_tb_procName.Text} - не найден!");
+                Error($"Требуемый процесс {procName} - не найден!");
             }
         }
     }
