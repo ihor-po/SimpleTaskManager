@@ -69,11 +69,41 @@ namespace SimpleTaskManager
             foreach (Process item in processes)
             {
                 ListViewItem i = new ListViewItem(item.Id.ToString());
+                
                 i.SubItems.Add(item.ProcessName);
+                i.SubItems.Add(GetPriority(item.BasePriority));
+             //   i.SubItems.Add(item?.MainModule?.ToString());
+                i.SubItems.Add(item.Responding.ToString());
+             //   i.SubItems.Add(item.PriorityClass.ToString());
+             //   i.SubItems.Add(item.Handle.ToString());
                 mf_lv.Items.Add(i);
             }
 
             this.Text = "Всего запущено процессов: " + processes.Count().ToString(); 
+        }
+
+        private string GetPriority(int p)
+        {
+            string res = "";
+            switch(p)
+            {
+                case 4:
+                    res = "Низкий";
+                    break;
+                case 8:
+                    res = "Нормальный";
+                    break;
+                case 13:
+                    res = "Высокий";
+                    break;
+                case 24:
+                    res = "Реальное время";
+                    break;
+                default:
+                    res = p.ToString();
+                    break;
+            }
+            return res;
         }
     }
 
