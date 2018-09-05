@@ -105,7 +105,16 @@ namespace SimpleTaskManager
             }
             else if (mf_cb_fin.Checked == true)
             {
+                Process pr = GetProcessByName(mf_tb_procName.Text);
 
+                if (pr != null)
+                {
+                    StopProcess(pr);
+                }
+                else
+                {
+                    Error($"Требуемый процесс {mf_tb_procName.Text} - не найден!");
+                }
             }
             else
             {
@@ -243,6 +252,32 @@ namespace SimpleTaskManager
                     SetLogData($"Запущен процесс {proc}");
                 }
                 
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+            }
+            
+        }
+
+        /// <summary>
+        /// Получение процесса по имени
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private Process GetProcessByName(string name)
+        {
+            Process pr = Process.GetProcessesByName(name).FirstOrDefault();
+
+            return pr;
+        }
+
+        private void StopProcess(Process pr)
+        {
+            try
+            {
+                pr.Kill();
+                SetLogData($"Процесс {pr.ProcessName} успешно остановлен!");
             }
             catch (Exception ex)
             {
