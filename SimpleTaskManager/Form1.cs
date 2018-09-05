@@ -67,7 +67,7 @@ namespace SimpleTaskManager
             
 
         }
-
+        #region Checkboxes_Events
         /// <summary>
         /// Обработка изменение состояния чекбокса запланировать
         /// </summary>
@@ -107,6 +107,7 @@ namespace SimpleTaskManager
                 mf_tb_procParam.Enabled = true;
             }
         }
+        #endregion
 
         /// <summary>
         /// Обработка нажатия кнопки "GO"
@@ -123,6 +124,18 @@ namespace SimpleTaskManager
 
             if (mf_cb_plan.Checked == true && mf_cb_fin.Checked == true)
             {
+                Thr.TimerCallback callback = new Thr.TimerCallback(StopProc);
+
+                eventTimer = new Thr.Timer(callback);
+
+                if (mf_dp_date.Value > mf_dp_time.Value)
+                {
+                    StartTimer(mf_dp_date.Value, mf_dp_time.Value, true);
+                }
+                else
+                {
+                    StartTimer(mf_dp_time.Value, mf_dp_date.Value, true);
+                }
 
             }
             else if (mf_cb_plan.Checked == true)
@@ -133,11 +146,11 @@ namespace SimpleTaskManager
 
                 if (mf_dp_date.Value > mf_dp_time.Value)
                 {
-                    StartTimer(mf_dp_date.Value, mf_dp_time.Value);
+                    StartTimer(mf_dp_date.Value, mf_dp_time.Value, false);
                 }
                 else
                 {
-                    StartTimer(mf_dp_time.Value, mf_dp_date.Value);
+                    StartTimer(mf_dp_time.Value, mf_dp_date.Value, false);
                 }
             }
             else if (mf_cb_fin.Checked == true)
@@ -190,6 +203,11 @@ namespace SimpleTaskManager
             this.Text = "Всего запущено процессов: " + processes.Count().ToString(); 
         }
 
+        /// <summary>
+        /// Получение тестового значения приорита
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         private string GetPriority(int p)
         {
             string res = "";
@@ -332,24 +350,47 @@ namespace SimpleTaskManager
         /// </summary>
         /// <param name="dtUne"></param>
         /// <param name="dtDeux"></param>
-        private void StartTimer(DateTime dtUne, DateTime dtDeux)
+        private void StartTimer(DateTime dtUne, DateTime dtDeux, bool needStop)
         {
-            try
+            if (!needStop)
             {
-                TimeSpan ts = dtUne.Subtract(dtDeux);
+                try
+                {
+                    TimeSpan ts = dtUne.Subtract(dtDeux);
 
-                eventTimer.Change(ts, new TimeSpan(0));
+                    eventTimer.Change(ts, new TimeSpan(0));
 
-                SetLogData($"Запланирован запуск процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
-                MessageBox.Show("Запуск процесса успешно запланирован!");
-                mf_cb_plan.Checked = false;
-                mf_tb_procName.Text = "";
-                mf_tb_procParam.Text = "";
+                    SetLogData($"Запланирован запуск процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
+                    MessageBox.Show("Запуск процесса успешно запланирован!");
+                    mf_cb_plan.Checked = false;
+                    mf_tb_procName.Text = "";
+                    mf_tb_procParam.Text = "";
+                }
+                catch (Exception ex)
+                {
+                    Error(ex.Message);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Error(ex.Message);
+                try
+                {
+                    TimeSpan ts = dtUne.Subtract(dtDeux);
+
+                    eventTimer.Change(ts, new TimeSpan(0));
+
+                    SetLogData($"Запланирована остановка процесса {mf_tb_procName.Text} время выполнения {dtUne.ToString()}");
+                    MessageBox.Show("Остановка процесса успешно запланирована!");
+                    mf_cb_plan.Checked = false;
+                    mf_tb_procName.Text = "";
+                    mf_tb_procParam.Text = "";
+                }
+                catch (Exception ex)
+                {
+                    Error(ex.Message);
+                }
             }
+
             
         }
 
@@ -360,6 +401,24 @@ namespace SimpleTaskManager
         private void StartProc(object a)
         {
             StartProcess(mf_tb_procName.Text, mf_tb_procParam.Text);
+        }
+
+        /// <summary>
+        /// Функция для вызова из таймера запуска процесса
+        /// </summary>
+        /// <param name="a"></param>
+        private void StopProc(object a)
+        {
+            Process pr = GetProcessByName(mf_tb_procName.Text);
+
+            if (pr != null)
+            {
+                StopProcess(pr);
+            }
+            else
+            {
+                Error($"Требуемый процесс {mf_tb_procName.Text} - не найден!");
+            }
         }
     }
 
