@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,8 +38,12 @@ namespace SimpleTaskManager
 
         private void Main_form_Load(object sender, EventArgs e)
         {
+            SetLogData("Запуск программы");
+            
             mainTimer = new Timer();
             mainTimer.Interval = 1000;
+
+            mf_dp_time.CustomFormat = "HH:mm:ss tt";
 
             mainTimer.Tick += MainTimer_Tick;
 
@@ -72,10 +77,7 @@ namespace SimpleTaskManager
                 
                 i.SubItems.Add(item.ProcessName);
                 i.SubItems.Add(GetPriority(item.BasePriority));
-             //   i.SubItems.Add(item?.MainModule?.ToString());
                 i.SubItems.Add(item.Responding.ToString());
-             //   i.SubItems.Add(item.PriorityClass.ToString());
-             //   i.SubItems.Add(item.Handle.ToString());
                 mf_lv.Items.Add(i);
             }
 
@@ -104,6 +106,38 @@ namespace SimpleTaskManager
                     break;
             }
             return res;
+        }
+
+        private void SetLogData(string str)
+        {
+            string path = @"..\..\Log";
+            string file = "logData.log";
+            string pathFile = path + @"\" + file;
+
+            if (File.Exists(pathFile))
+            {
+                using (StreamWriter sw = new StreamWriter(pathFile, true))
+                {
+                    sw.WriteLine(DateTime.Now.ToString() + ' ' + str);
+                    sw.Close();
+                }
+                
+            }
+            else
+            {
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                
+                using (FileStream fs = File.Create(pathFile))
+                {
+                    Byte[] info = new UTF8Encoding(true).GetBytes(DateTime.Now.ToString() + " Создание файла для храниения логов " + 
+                        "\n" + DateTime.Now.ToString() + ' ' + str);
+                    fs.Write(info, 0, info.Length);
+                }
+            }
+            
         }
     }
 
