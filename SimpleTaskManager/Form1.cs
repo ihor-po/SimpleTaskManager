@@ -46,14 +46,74 @@ namespace SimpleTaskManager
             mf_dp_time.CustomFormat = "HH:mm:ss tt";
 
             mainTimer.Tick += MainTimer_Tick;
+            mf_goBtn.Click += Mf_goBtn_Click;
+            mf_cb_fin.CheckedChanged += Mf_cb_fin_CheckedChanged;
+
+            try
+            {
+                mainTimer.Start();
+                SetLogData(this.Text);
+            }
+            catch (Exception ex)
+            {
+                SetLogData(ex.Message);
+                throw;
+            }
 
             
 
+        }
 
-            mainTimer.Start();
-            AllProcess();
+        /// <summary>
+        /// Измеенение состояния чекбокса Завершить
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Mf_cb_fin_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mf_cb_fin.Checked == true)
+            {
+                mf_tb_procParam.Text = "";
+                mf_tb_procParam.Enabled = false;
+            }
+            else
+            {
+                mf_tb_procParam.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// Обработка нажатия кнопки "GO"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Mf_goBtn_Click(object sender, EventArgs e)
+        {
+            if (mf_tb_procName.Text == "")
+            {
+                Error("Ошибка! Вы не ввели процесс!");
+                return;
+            }
+
+            if (mf_cb_plan.Checked == true && mf_cb_fin.Checked == true)
+            {
+
+            }
+            else if (mf_cb_plan.Checked == true)
+            {
+
+            }
+            else if (mf_cb_fin.Checked == true)
+            {
+
+            }
+            else
+            {
+                StartProcess(mf_tb_procName.Text, mf_tb_procParam.Text);
+            }
 
         }
+
 
         /// <summary>
         /// Обработка тика таймера
@@ -108,6 +168,10 @@ namespace SimpleTaskManager
             return res;
         }
 
+        /// <summary>
+        /// Запись события в лог файл
+        /// </summary>
+        /// <param name="str"></param>
         private void SetLogData(string str)
         {
             string path = @"..\..\Log";
@@ -123,7 +187,7 @@ namespace SimpleTaskManager
                 }
                 
             }
-            else
+            else //создание файла если такого не было
             {
                 if (!Directory.Exists(path))
                 {
@@ -132,10 +196,57 @@ namespace SimpleTaskManager
                 
                 using (FileStream fs = File.Create(pathFile))
                 {
-                    Byte[] info = new UTF8Encoding(true).GetBytes(DateTime.Now.ToString() + " Создание файла для храниения логов " + 
-                        "\n" + DateTime.Now.ToString() + ' ' + str);
+                    Byte[] info = new UTF8Encoding(true).GetBytes($"{ DateTime.Now.ToString() } Создание файла для храниения логов " + 
+                        $"\n { DateTime.Now.ToString() } { str }\n");
                     fs.Write(info, 0, info.Length);
                 }
+            }
+            
+        }
+
+        /// <summary>
+        /// Запись в лог и сообщение об ошибке 
+        /// </summary>
+        /// <param name="msg"></param>
+        private void Error(string msg)
+        {
+            SetLogData(msg);
+            ShowMessage(msg);
+        }
+        
+        /// <summary>
+        /// Отображение сообщения
+        /// </summary>
+        /// <param name="msg"></param>
+        private void ShowMessage(string msg)
+        {
+            MessageBox.Show(msg, "Простой таск менеджер", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        /// <summary>
+        /// Запуск процесса
+        /// </summary>
+        /// <param name="proc"></param>
+        /// <param name="param"></param>
+        private void StartProcess(string proc, string param)
+        {
+            try
+            {
+                if (param != "")
+                {
+                    Process.Start(proc, param);
+                    SetLogData($"Запущен процесс {proc} с параметрами {param}");
+                }
+                else
+                {
+                    Process.Start(proc);
+                    SetLogData($"Запущен процесс {proc}");
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
             }
             
         }
